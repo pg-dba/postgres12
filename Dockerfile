@@ -1,4 +1,6 @@
-FROM postgres:12
+FROM postgres:10
+
+COPY *.sh /var/lib/postgresql/
 
 RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -10,17 +12,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
     apt-get clean all && \
     apt-get -y autoremove --purge && \
     unset DEBIAN_FRONTEND && \
-    echo 'alias nocomments="sed -e :a -re '"'"'s/<!--.*?-->//g;/<!--/N;//ba'"'"' | grep -v -P '"'"'^\s*(#|;|$)'"'"'"' >> ~/.bashrc
-
-RUN mkdir -p /var/lib/postgresql/backups && \
-    chown -R 999:999 /var/lib/postgresql/backups && \
-    chmod 777 /var/lib/postgresql/backups
-	
-COPY *.sh /var/lib/postgresql/
-
-RUN chown 999:999 /var/lib/postgresql/* && \
-    chmod 700 /var/lib/postgresql/*.sh
-
-VOLUME /var/lib/postgresql/backups
+    chown 999:999 /var/lib/postgresql/*.sh && \
+    chmod 700 /var/lib/postgresql/*.sh && \
+    echo 'alias nocomments="sed -e :a -re '"'"'s/<\!--.*?-->//g;/<\!--/N;//ba'"'"' | sed -e :a -re '"'"'s/\/\*.*?\*\///g;/\/\*/N;//ba'"'"' | grep -v -P '"'"'^\s*(#|;|--|//|$)'"'"'"' >> ~/.bashrc
 
 WORKDIR /var/lib/postgresql
